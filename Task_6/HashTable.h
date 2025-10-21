@@ -30,11 +30,17 @@ class HashTable {
 
 
         // h(k) = ((a*k + b) mod p) mod m - универсальное хеширование
-        mpz_class a, b;
+        mpz_class Hash;
+        mpz_class a;
+        mpz_urandomb(a.get_mpz_t(), state, 64);
+        mpz_class b;
+        mpz_urandomb(b.get_mpz_t(), state, 64);
         mpz_class p = generate_safe_prime(state, 64);
 
+        Hash = ((a * (mzp_class)value + b) % p) % capaity;
+
         gmp_randclear(state);
-        return -1;
+        return Hash;
     }
 
  private:
