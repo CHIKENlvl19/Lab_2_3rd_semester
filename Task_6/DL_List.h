@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <vector>
 #include <fstream>
@@ -32,28 +33,22 @@ struct DL_list {
 
 
 template <typename T>
-void loadFromFileDL(DL_list<T>& list, const string& filename);
+void addHeadDL(DL_list<T>& list, const T& value);
 
 template <typename T>
-void saveToFileDL(const DL_list<T>& list, const string& filename);
+void addTailDL(DL_list<T>& list, const T& value);
 
 template <typename T>
-void addHeadDL(DL_list<T>& list, const T& value, const string& filename);
+void addAfterDL(DL_list<T>& list, int index, const T& value);
 
 template <typename T>
-void addTailDL(DL_list<T>& list, const T& value, const string& filename);
+void addBeforeDL(DL_list<T>& list, int index, const T& value);
 
 template <typename T>
-void addAfterDL(DL_list<T>& list, int index, const T& value, const string& filename);
+void removeByValueDL(DL_list<T>& list, const T& value);
 
 template <typename T>
-void addBeforeDL(DL_list<T>& list, int index, const T& value, const string& filename);
-
-template <typename T>
-void removeByValueDL(DL_list<T>& list, const T& value, const string& filename);
-
-template <typename T>
-int searchByValueDL(DL_list<T>& list, const T& value, const string& filename);
+int searchByValueDL(DL_list<T>& list, const T& value);
 
 template <typename T>
 void printDL(DL_list<T>& list);

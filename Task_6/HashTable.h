@@ -9,10 +9,8 @@
 using namespace std;
 
 
-
 template <typename T>
 struct Bucket {
-    int hash;
     DL_list<T> values;
 };
 
@@ -43,10 +41,37 @@ class HashTable {
         return Hash;
     }
 
+    void insert(T value) {
+
+    }
+
+    void remove(T value) {
+
+    }
+
+    bool isPresent(T value) {
+
+    }
+
+    void clean() {
+
+    }
+
+    HashTable() : loadFactor(0.0), size(0), capacity(5) {
+        
+        Bucket arr = new Bucket[capacity];
+
+        
+    }
+
+    ~HashTable() {
+        clean();
+    }
+
  private:
     Bucket* bucket;
     
     float loadFactor;
     int size;
-    int capaity;
+    int capacity;
 };

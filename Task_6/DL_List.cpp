@@ -57,60 +57,9 @@ void DL_list<T>::clear() {
     size = 0;
 }
 
-template <typename T>
-void loadFromFileDL(DL_list<T>& list, const string& filename) {
-    if(filename.empty()) 
-    {
-        return;
-    }
-
-    ifstream in(filename);
-    if(!in.is_open()) 
-    {
-        list.clear();
-        return;
-    }
-
-    vector<T> vals;
-    T line;
-    while(in >> line) 
-    {
-        vals.push_back(line);
-    }
-
-    in.close();
-    list.clear();
-
-    for(const auto& v : vals) 
-    {
-        addTailDL(list, v, "");
-    }
-}
 
 template <typename T>
-void saveToFileDL(const DL_list<T>& list, const string& filename) {
-    if(filename.empty()) {
-        return;
-    }
-
-    ofstream out(filename, ios::trunc);
-    if(!out.is_open()) {
-        throw runtime_error("Cannot open DL_list file for writing: " + filename);
-    }
-
-    NodeDL<T>* current = list.head;
-    while(current) {
-        out << current->value << "\n";
-        current = current->next;
-    }
-
-    out.close();
-}
-
-
-template <typename T>
-void addHeadDL(DL_list<T>& list, const T& value, const string& filename) {
-    loadFromFileDL(list, filename);
+void addHeadDL(DL_list<T>& list, const T& value) {
 
     NodeDL<T>* newNode = new NodeDL<T>(value, list.head, nullptr);
     if(list.head) 
@@ -124,12 +73,10 @@ void addHeadDL(DL_list<T>& list, const T& value, const string& filename) {
 
     list.head = newNode;
     list.size++;
-    saveToFileDL(list, filename);
 }
 
 template <typename T>
-void addTailDL(DL_list<T>& list, const T& value, const string& filename) {
-    loadFromFileDL(list, filename);
+void addTailDL(DL_list<T>& list, const T& value) {
 
     NodeDL<T>* newNode = new NodeDL<T>(value, nullptr, list.tail);
     if(list.tail) 
@@ -143,12 +90,10 @@ void addTailDL(DL_list<T>& list, const T& value, const string& filename) {
 
     list.tail = newNode;
     list.size++;
-    saveToFileDL(list, filename);
 }
 
 template <typename T>
-void addAfterDL(DL_list<T>& list, int index, const T& value, const string& filename) {
-    loadFromFileDL(list, filename);
+void addAfterDL(DL_list<T>& list, int index, const T& value) {
 
     if(index < 0 || index >= list.size) 
     {
@@ -174,12 +119,10 @@ void addAfterDL(DL_list<T>& list, int index, const T& value, const string& filen
 
     current->next = newNode;
     list.size++;
-    saveToFileDL(list, filename);
 }
 
 template <typename T>
-void addBeforeDL(DL_list<T>& list, int index, const T& value, const string& filename) {
-    loadFromFileDL(list, filename);
+void addBeforeDL(DL_list<T>& list, int index, const T& value) {
 
     if(index < 0 || index >= list.size) 
     {
@@ -205,13 +148,11 @@ void addBeforeDL(DL_list<T>& list, int index, const T& value, const string& file
 
     current->previous = newNode;
     list.size++;
-    saveToFileDL(list, filename);
 }
 
 
 template <typename T>
-void removeByValueDL(DL_list<T>& list, const T& value, const string& filename) {
-    loadFromFileDL(list, filename);
+void removeByValueDL(DL_list<T>& list, const T& value) {
 
     NodeDL<T>* current = list.head;
     while(current && current->value != value)
@@ -244,24 +185,22 @@ void removeByValueDL(DL_list<T>& list, const T& value, const string& filename) {
 
     delete current;
     list.size--;
-    saveToFileDL(list, filename);
 }
 
 
 template <typename T>
-int searchByValueDL(DL_list<T>& list, const T& value, const string& filename) {
-    loadFromFileDL(list, filename);
+int searchByValueDL(DL_list<T>& list, const T& value) {
 
     NodeDL<T>* current = list.head;
-    int idx = 0;
+    int index = 0;
     while(current)
     {
         if(current->value == value)
         {
-            return idx;
+            return index;
         }
         current = current->next;
-        idx++;
+        index++;
     }
     return -1;
 }
