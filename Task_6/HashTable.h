@@ -25,13 +25,13 @@ class HashTable {
 
  public:
 
-    HashTable() : loadFactor(0.0), size(0), capacity(5) {
+    HashTable() : buckets(nullptr), loadFactor(0.0), size(0), capacity(5) {
         
         buckets = new Bucket<T>[capacity];
 
         gmp_randinit_default(state);
         random_device rd;
-        unsigned long seed = rd();
+        unsigned long seed = 1488;
         mpz_class seed_mpz = seed;
         gmp_randseed(state, seed_mpz.get_mpz_t());
 
@@ -45,29 +45,64 @@ class HashTable {
         gmp_randclear(state);
     }
 
-    int hashing(T value) {
-        
+    int hashing(const T& value) const {
+        mpz_class key = convertToNumber(value);
+        mpz_class hash = ( (a * key + b) % p ) % capacity;
+
+        return static_cast<int>(hash.get_ui());
     }
 
-    void insert(T value) {
-
+    void insert(const T& value) {
+        int index = hashing(value);
+        if(buckets[index].values.searchByValue(value) == -1)
+        {
+            buckets[index].values.addTail(value);
+            size++;
+            loadFactor = static_cast<float>(size) / capacity;
+        }
     }
 
     void remove(T value) {
+        int index = hashing(value);
 
+        if(buckets[index].values.searchByValue(value) == -1)
+        {
+            cerr << "Error, element " << value << " is not present in talbe!" << endl;
+            return;
+        }
+        else
+        {
+            buckets[index].values.removeByValue(value);
+            size--;
+            loadFactor = static_cast<float>(size) / capacity;
+        }
     }
 
     bool isPresent(T value) {
-
+        int index = hashing(value);
+        return buckets[index].values.searchByValue(value) != -1;
     }
 
     void clean() {
+        if(buckets)
+        {
+            delete[] buckets;
+            buckets = nullptr;
+        }
+        size = 0;
+        loadFactor = 0.0;
+    }
 
-        
+    void print() {
+        for(int i = 0; i < capacity; i++)
+        {
+            cout << "[" << i << "]: ";
+            buckets[i].values.print();
+        }
     }
 
  private:
-    Bucket<T>* bucket;
+    Bucket<T>* buckets;
     float loadFactor;
     size_t size;
     int capacity;
@@ -92,7 +127,7 @@ class HashTable {
                 hash = hash * 131 + static_cast<unsigned char>(c);
             }
 
-            return mpz_class(hash);
+            return mpz_class(static_cast<unsigned long>(hash));
         }
     }
 };
