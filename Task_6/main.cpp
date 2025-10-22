@@ -10,8 +10,6 @@ int main() {
     table.insert("apple");
     table.insert("banana");
     table.insert("cherry");
-    table.insert("shit");
-    table.insert("kek");
     table.insert("pipiska");
 
     table.print();
