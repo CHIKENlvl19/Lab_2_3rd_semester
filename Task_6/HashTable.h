@@ -46,7 +46,7 @@ class HashTable {
     }
 
     int hashing(const T& value) const {
-        mpz_class key = convertToNumber(value);
+        mpz_class key = /*convertToNumber*/value;
         mpz_class hash = ( (a * key + b) % p ) % capacity;
 
         return static_cast<int>(hash.get_ui());
@@ -59,6 +59,11 @@ class HashTable {
             buckets[index].values.addTail(value);
             size++;
             loadFactor = static_cast<float>(size) / capacity;
+        }
+        else
+        {
+            cerr << "Error, element " << value << " is already in the table!" << endl;
+            return;
         }
     }
 
@@ -117,7 +122,7 @@ class HashTable {
         return r;
     }
 
-    mpz_class convertToNumber(const T& value) const {
+    /*mpz_class convertToNumber(const T& value) const {
         if constexpr (is_integral_v<T>) {
             return mpz_class(value);
         }
@@ -129,5 +134,5 @@ class HashTable {
 
             return mpz_class(static_cast<unsigned long>(hash));
         }
-    }
+    }*/
 };

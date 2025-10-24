@@ -3,20 +3,42 @@
 
 using namespace std;
 
+void createRandomTable(int N, HashTable<mpz_class>& table) {
+    random_device rd;
+    unsigned long seed = rd();
+    mpz_class seed_mpz = seed;
+
+    gmp_randstate_t state;
+    gmp_randinit_default(state);
+    gmp_randseed(state, seed_mpz.get_mpz_t());
+
+    for(int i = 0; i < N; i++)
+    {
+        mpz_class number;
+        mpz_urandomb(number.get_mpz_t(), state, 64);
+        table.insert(number);
+    }
+
+    gmp_randclear(state);
+}
+
+int theLongestChain() {
+
+}
+
+int theShortestChain() {
+    
+}
+
 int main() {
 
-    HashTable<string> table;
+    HashTable<mpz_class> table;
 
-    table.insert("apple");
-    table.insert("banana");
-    table.insert("cherry");
-    table.insert("pipiska");
+    cout << "Введите количество случайных чисел N: ";
+    int N;
+    cin >> N;
 
-    table.print();
-
-    cout << "Has 'banana'? " << (table.isPresent("banana") ? "yes" : "no") << endl;
-
-    table.remove("banana");
+    createRandomTable(N, table);
 
     table.print();
 
