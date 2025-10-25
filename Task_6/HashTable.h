@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <fstream>
 #include <gmpxx.h>
 #include "DL_List.h"
 
@@ -25,19 +26,20 @@ class HashTable {
 
  public:
 
-    HashTable() : buckets(nullptr), loadFactor(0.0), size(0), capacity(5) {
-        
-        buckets = new Bucket<T>[capacity];
+    HashTable() 
+        : buckets(nullptr), loadFactor(0.0), size(0), capacity(5) 
+    {
+        init();    
+    }
 
-        gmp_randinit_default(state);
-        random_device rd;
-        unsigned long seed = 1488;
-        mpz_class seed_mpz = seed;
-        gmp_randseed(state, seed_mpz.get_mpz_t());
-
-        a = get_random_64();
-        b = get_random_64();
-        p = generate_safe_prime(state, 64);
+    explicit HashTable(int cap)
+        : buckets(nullptr), loadFactor(0.0), size(0), capacity(cap/100) 
+    {
+        if(capacity <= 0)
+        {
+            capacity = 5;
+        }
+        init();
     }
 
     ~HashTable() {
@@ -99,11 +101,19 @@ class HashTable {
     }
 
     void print() {
+        
+        ofstream out;
+        out.open("hash_table.txt");
+        
         for(int i = 0; i < capacity; i++)
         {
             cout << "[" << i << "]: ";
             buckets[i].values.print();
+
+            out << "[" << i << "]: ";
+            buckets[i].values.print(out);
         }
+        out.close();
     }
 
  private:
@@ -121,6 +131,23 @@ class HashTable {
         mpz_urandomb(r.get_mpz_t(), state, 64);
         return r;
     }
+
+    void init() {
+        buckets = new Bucket<T>[capacity];
+
+        gmp_randinit_default(state);
+        random_device rd;
+        unsigned long seed = 1488;
+        mpz_class seed_mpz = seed;
+        gmp_randseed(state, seed_mpz.get_mpz_t());
+
+        a = get_random_64();
+        b = get_random_64();
+        p = generate_safe_prime(state, 64);
+    }
+
+    friend int theLongestChain(const HashTable<mpz_class>& table);
+    friend int theShortestChain(HashTable<mpz_class>& table);
 
     /*mpz_class convertToNumber(const T& value) const {
         if constexpr (is_integral_v<T>) {

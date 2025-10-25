@@ -22,12 +22,37 @@ void createRandomTable(int N, HashTable<mpz_class>& table) {
     gmp_randclear(state);
 }
 
-int theLongestChain() {
+int theLongestChain(const HashTable<mpz_class>& table) {
+    
+    int chainLength = 0;
+    int maxChainLength = 0;
 
+    for(int i = 0; i < table.capacity; i++)
+    {
+        chainLength = table.buckets[i].values.size;
+        if(chainLength > maxChainLength)
+        {
+            maxChainLength = chainLength;
+        }
+    }
+
+    return maxChainLength;
 }
 
-int theShortestChain() {
-    
+int theShortestChain(HashTable<mpz_class>& table) {
+    int chainLength = 0;
+    int minChainLength = 99999;
+
+    for(int i = 0; i < table.capacity; i++)
+    {
+        chainLength = table.buckets[i].values.size;
+        if(chainLength < minChainLength)
+        {
+            minChainLength = chainLength;
+        }
+    }
+
+    return minChainLength;
 }
 
 int main() {
@@ -41,6 +66,10 @@ int main() {
     createRandomTable(N, table);
 
     table.print();
+    cout << endl;
+
+    cout << "Самая длинная цепочка - " << theLongestChain(table) << " символов." << endl;
+    cout << "Самая короткая цепочка - " << theShortestChain(table) << " символов." << endl;
 
     return 0;
 }

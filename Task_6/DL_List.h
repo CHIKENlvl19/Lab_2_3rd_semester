@@ -202,20 +202,20 @@ class DL_list {
         return -1;
     }
 
-    void print() {
+    void print(ostream& os = cout) {
         NodeDL<T>* current = head;
 
-        cout << "[";
+        os << "[";
         while(current)
         {
-            cout << current->value;
+            os << current->value;
             if(current->next)
             {
-                cout << " <-> ";
+                os << " <-> ";
             }
             current = current->next;
         }
-        cout << "]" << endl;
+        os << "]" << endl;
     }
 
     void backwardsPrint() {
