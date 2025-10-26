@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <random>
-#include <fstream>
 #include <gmpxx.h>
 #include "DL_List.h"
 
@@ -27,13 +26,13 @@ class HashTable {
  public:
 
     HashTable() 
-        : buckets(nullptr), loadFactor(0.0), size(0), capacity(5) 
+        : buckets(nullptr), loadFactor(0.0f), size(0), capacity(5) 
     {
         init();    
     }
 
     explicit HashTable(int cap)
-        : buckets(nullptr), loadFactor(0.0), size(0), capacity(cap/100) 
+        : buckets(nullptr), loadFactor(0.0f), size(0), capacity(cap/100) 
     {
         if(capacity <= 0)
         {
