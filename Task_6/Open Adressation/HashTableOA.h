@@ -18,8 +18,12 @@ class HashTableOA {
         init();
     }
 
-    ~HashTableOA() {
+    void clean() {
         delete[] table;
+    }
+
+    ~HashTableOA() {
+        clean();
     }
 
     size_t getSize() const {
