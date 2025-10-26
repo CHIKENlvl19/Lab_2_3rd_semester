@@ -95,26 +95,34 @@ class Stack {
         size--;
     }
 
-    void print() {
-    if(size == 0) 
-    {
-        cout << "Stack is empty!" << endl;
-        return;
+    T peek() const {
+        if(size == 0)
+        {
+            throw underflow_error("Stack is empty!");
+        }
+        return head->value;
     }
 
-    NodeStack* current = head;
-        cout << "nullptr";
-        while(current != nullptr) 
+    void print() {
+        if(size == 0) 
         {
-            cout << " <- " << current->value;
-            current = current->next;
+            cout << "Stack is empty!" << endl;
+            return;
         }
-        cout << endl;
-    }
+
+        NodeStack* current = head;
+            cout << "nullptr";
+            while(current != nullptr) 
+            {
+                cout << " <- " << current->value;
+                current = current->next;
+            }
+            cout << endl;
+        }
     
-    int getSize() const {
-        return size;
-    }
+        int getSize() const {
+            return size;
+        }
 
  private:
 
