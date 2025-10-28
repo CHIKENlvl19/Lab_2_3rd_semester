@@ -47,7 +47,7 @@ class HashTable {
     }
 
     int hashing(const T& value) const {
-        mpz_class key = /*convertToNumber*/value;
+        mpz_class key = value;
         mpz_class hash = ( (a * key + b) % p ) % capacity;
 
         return static_cast<int>(hash.get_ui());
@@ -147,18 +147,4 @@ class HashTable {
 
     friend int theLongestChain(const HashTable<mpz_class>& table);
     friend int theShortestChain(HashTable<mpz_class>& table);
-
-    /*mpz_class convertToNumber(const T& value) const {
-        if constexpr (is_integral_v<T>) {
-            return mpz_class(value);
-        }
-        else {
-            unsigned long long hash = 0;
-            for(char c : value) {
-                hash = hash * 131 + static_cast<unsigned char>(c);
-            }
-
-            return mpz_class(static_cast<unsigned long>(hash));
-        }
-    }*/
 };
