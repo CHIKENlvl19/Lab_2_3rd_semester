@@ -19,9 +19,15 @@ int main() {
     auto D = A.intersectWith(B);
     auto E = A.differenceWith(B);
 
-    cout << "Union:\n"; C.print();
-    cout << "Intersection:\n"; D.print();
-    cout << "Difference:\n"; E.print();
+    cout << "Множество A:" << endl;
+    A.print();
+    cout << "Множество B:" << endl;
+    B.print();
+    cout << endl;
+
+    cout << "Объединение:\n"; C.print();
+    cout << "Пересечение:\n"; D.print();
+    cout << "Разность:\n"; E.print();
 
     return 0;
 }

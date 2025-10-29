@@ -6,11 +6,15 @@ using namespace std;
 
 int main() {
     size_t cacheSize;
+    int requestCount;
 
     while (true) 
     {
         cout << "Введите размер кэша: ";
         cin >> cacheSize;
+
+        cout << "Введите количество запросов: ";
+        cin >> requestCount;
 
         if (cacheSize < 2)
         {
@@ -30,7 +34,7 @@ int main() {
     string input;
     vector<int> getResults;
 
-    while (true) 
+    while (requestCount != 0) 
     {
         cout << "> ";
         cin >> input;
@@ -45,6 +49,8 @@ int main() {
             cache.set(key, value);
             cout << "SET " << key << " " << value << " : ";
             cache.printCacheState();
+
+            requestCount--;
         } 
         else if (cmd == Command::GET) 
         {
@@ -59,6 +65,8 @@ int main() {
                 cout << "GET " << key << " : -1\n";
                 getResults.push_back(-1);
             }
+
+            requestCount--;
         }
         else if (input == "EXIT") 
         {

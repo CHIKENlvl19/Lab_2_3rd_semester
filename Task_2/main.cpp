@@ -6,7 +6,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
     if(argc < 5) 
     {
-        cerr << "Usage: ./dbms --file file.data --query 'cmd'\n";
+        cerr << "Usage: ./main --file file.data --query 'cmd'\n";
         return 1;
     }
 
