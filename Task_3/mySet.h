@@ -66,5 +66,4 @@ class mySet {
 
  private:
     HashTableOA<T> table;
-
 };
