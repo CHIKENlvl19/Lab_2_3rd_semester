@@ -11,7 +11,7 @@ using namespace std;
 template <typename T>
 class HashTableOA {
  public:
-    HashTableOA(int capacity = 16)
+    HashTableOA(int capacity = 100000)
         : size(0), capacity(capacity), loadFactor(0.0f)
     {
         table = new Cell[capacity];
@@ -28,6 +28,10 @@ class HashTableOA {
 
     size_t getSize() const {
         return size;
+    }
+
+    size_t getCapacity() const {
+        return capacity;
     }
 
     float getLoadFactor() const {
