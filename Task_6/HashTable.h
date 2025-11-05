@@ -15,12 +15,35 @@ mpz_class generate_safe_prime(gmp_randstate_t state, int bits) {
     return prime;
 }
 
-template <typename T>
-struct Bucket {
-    DL_list<T> values;
+template <typename Key, typename Value>
+struct Pair {
+    Key key;
+    Value value;
+
+    Pair() {}
+    Pair(const Key& k, const Value& v) : key(k), value(v) {}
+
+
+    friend ostream& operator<<(ostream& os, const Pair& p) {
+        os << "(" << p.key << " : " << p.value << ")";
+        return os;
+    }
+
+    bool operator==(const Pair& other) const {
+        return key == other.key && value == other.value;
+    }
+
+    bool operator!=(const Pair& other) const {
+        return !(*this == other);
+    }
 };
 
-template <typename T>
+template <typename Key, typename Value>
+struct Bucket {
+    DL_list<Pair<Key, Value>> values;
+};
+
+template <typename Key, typename Value>
 class HashTable {
 
  public:
@@ -46,47 +69,64 @@ class HashTable {
         gmp_randclear(state);
     }
 
-    int hashing(const T& value) const {
-        mpz_class key = value;
-        mpz_class hash = ( (a * key + b) % p ) % capacity;
+    int hashing(const Key& key) const {
+        mpz_class key_mpz = key;
+        mpz_class hash = ( (a * key_mpz + b) % p ) % capacity;
 
         return static_cast<int>(hash.get_ui());
     }
 
-    void insert(const T& value) {
-        int index = hashing(value);
-        if(buckets[index].values.searchByValue(value) == -1)
+    void insert(const Key& key, const Value& value) {
+        int index = hashing(key);
+
+        if(searchPairByKey(buckets[index].values, key) == -1)
         {
-            buckets[index].values.addTail(value);
+            buckets[index].values.addTail(Pair<Key, Value>(key, value));
             size++;
             loadFactor = static_cast<float>(size) / capacity;
         }
         else
         {
-            cerr << "Error, element " << value << " is already in the table!" << endl;
-            return;
+            cerr << "Error, key " << key << " is already in the table!" << endl;
         }
     }
 
-    void remove(T value) {
-        int index = hashing(value);
+    void remove(const Key& key) {
+        int index = hashing(key);
+        int found = searchPairByKey(buckets[index].values, key);
 
-        if(buckets[index].values.searchByValue(value) == -1)
+        if(found == -1)
         {
-            cerr << "Error, element " << value << " is not present in talbe!" << endl;
+            cerr << "Error, key " << key << " is not present in table!" << endl;
             return;
         }
         else
         {
-            buckets[index].values.removeByValue(value);
+            buckets[index].values.removeByValue(Pair<Key, Value>(key, Value()));
             size--;
             loadFactor = static_cast<float>(size) / capacity;
         }
     }
 
-    bool isPresent(T value) {
-        int index = hashing(value);
-        return buckets[index].values.searchByValue(value) != -1;
+    bool isPresent(const Key& key) {
+        int index = hashing(key);
+        return searchPairByKey(buckets[index].values, key) != -1;
+    }
+
+    Value find(const Key& key) {
+        int index = hashing(key);
+        NodeDL<Pair<Key, Value>>* current = buckets[index].values.head;
+
+        while(current)
+        {
+            if(current->value.key == key)
+            {
+                return current->value.value;
+            }
+            current = current->next;
+        }
+
+        return Value();
     }
 
     void clean() {
@@ -116,11 +156,10 @@ class HashTable {
     }
 
  private:
-    Bucket<T>* buckets;
+    Bucket<Key, Value>* buckets;
     float loadFactor;
     size_t size;
     int capacity;
-
 
     mpz_class a, b, p;
     gmp_randstate_t state;
@@ -132,7 +171,7 @@ class HashTable {
     }
 
     void init() {
-        buckets = new Bucket<T>[capacity];
+        buckets = new Bucket<Key, Value>[capacity];
 
         gmp_randinit_default(state);
         random_device rd;
@@ -145,6 +184,22 @@ class HashTable {
         p = generate_safe_prime(state, 64);
     }
 
-    friend int theLongestChain(const HashTable<mpz_class>& table);
-    friend int theShortestChain(HashTable<mpz_class>& table);
+    int searchPairByKey(DL_list<Pair<Key, Value>>& list, const Key& key) {
+        NodeDL<Pair<Key, Value>>* current = list.head;
+        int index = 0;
+
+        while(current)
+        {
+            if(current->value.key == key)
+            {
+                return index;
+            }
+            current = current->next;
+            index++;
+        }
+        return -1;
+    }
+
+    friend int theLongestChain(const HashTable<mpz_class, string>& table);
+    friend int theShortestChain(HashTable<mpz_class, string>& table);
 };

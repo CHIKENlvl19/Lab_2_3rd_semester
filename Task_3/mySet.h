@@ -7,7 +7,7 @@ class mySet {
 
  public:
     bool insert(const T& value) {
-        return table.insert(value);
+        return table.insert(value, true);
     }
 
     bool remove(const T& value) {
@@ -65,5 +65,5 @@ class mySet {
     }
 
  private:
-    HashTableOA<T> table;
+    HashTableOA<T, bool> table;
 };

@@ -8,7 +8,7 @@
 using namespace std;
 
 
-template <typename T>
+template <typename Key, typename Value>
 class HashTableOA {
  public:
 
@@ -18,8 +18,8 @@ class HashTableOA {
 
         Iterator(const HashTableOA* t, size_t i) : table(t), index(i) {}
 
-        const T& operator*() const {
-            return table->table[index].value;
+        const Key& operator*() const {
+            return table->table[index].key;
         }
 
         Iterator& operator++() {
@@ -50,7 +50,8 @@ class HashTableOA {
         return Iterator(this, capacity);
     }
 
-    HashTableOA(int capacity = 16)
+
+    HashTableOA(size_t capacity = 16)
         : size(0), capacity(capacity), loadFactor(0.0f)
     {
         table = new Cell[capacity];
@@ -67,20 +68,13 @@ class HashTableOA {
         {
             if (other.table[i].isOccupied && !other.table[i].isDeleted) 
             {
-                insert(other.table[i].value);
+                insert(other.table[i].key, other.table[i].value);
             }
         }
     }
 
     void clean() {
-        if(table != nullptr)
-        {
-            delete[] table;
-            table = nullptr;
-        }
-        
-        size = 0;
-        loadFactor = 0.0f;
+        delete[] table;
     }
 
     ~HashTableOA() {
@@ -95,68 +89,23 @@ class HashTableOA {
         return static_cast<float>(size) / capacity;
     }
 
-
-    // h(k) = ((a*k + b) mod p) mod m
-    size_t h1(const T& key) const {
-        long long keyValue;
-
-        if constexpr (is_integral_v<T> || is_floating_point_v<T>)
-        {
-            keyValue = static_cast<long long>(key);
-        }
-        else
-        {
-            unsigned long long hash = 0;
-            for(char c : key)
-            {
-                hash = hash * 131 + static_cast<unsigned char>(c);
-            }
-
-            keyValue = hash;
-        }
-
-        return static_cast<size_t>(( (a * keyValue + b) % p ) % capacity);
-    }
-
-    size_t h2(const T& key) const {
-        const double A = 0.6180339887;
-        double k_double = 0.0;
-
-        if constexpr (is_integral_v<T> || is_floating_point_v<T>)
-        {
-            k_double = static_cast<double>(key);
-        }
-        else
-        {
-            unsigned long long hashValue = 0;
-
-            for(char c : key)
-            {
-                hashValue = hashValue * 131 + static_cast<unsigned char>(c);
-            }
-
-            k_double = static_cast<double>(hashValue);
-        }
-
-        double frac = k_double * A - floor(k_double * A);
-        return static_cast<size_t>(capacity * frac) + 1;
-    }
-
-    bool insert(const T& key) {
-        size_t index;
-
+    bool insert(const Key& key, const Value& value) {
+        
         if(isPresent(key))
         {
             return false;
         }
-
+        
+        size_t index;
+        
         for(size_t i = 0; i < capacity; i++)
         {
             index = (h1(key) + i * h2(key)) % capacity;
 
             if(!table[index].isOccupied || table[index].isDeleted)
             {
-                table[index].value = key;
+                table[index].key = key;
+                table[index].value = value;
                 table[index].isOccupied = true;
                 table[index].isDeleted = false;
                 size++;
@@ -169,23 +118,7 @@ class HashTableOA {
         return false;
     }
 
-    bool isPresent(const T& key) const {
-        size_t index;
-
-        for(size_t i = 0; i < capacity; i++)
-        {
-            index = (h1(key) + i * h2(key)) % capacity;
-
-            if(table[index].isOccupied && table[index].value == key)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    bool remove(const T& key) {
+    bool isPresent(const Key& key) const {
         size_t index;
 
         for(size_t i = 0; i < capacity; i++)
@@ -197,7 +130,49 @@ class HashTableOA {
                 return false;
             }
 
-            if(table[index].isOccupied && table[index].value == key)
+            if(table[index].isOccupied && table[index].key == key)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    Value find (const Key& key) {
+        size_t index;
+
+        for(size_t i = 0; i < capacity; i++)
+        {
+            index = (h1(key) + i * h2(key)) % capacity;
+
+            if(!table[index].isOccupied && !table[index].isDeleted)
+            {
+                return Value();
+            }
+
+            if(table[index].isOccupied && table[index].key == key)
+            {
+                return table[index].value;
+            }
+        }
+
+        return Value();
+    }
+
+    bool remove(const Key& key) {
+        size_t index;
+
+        for(size_t i = 0; i < capacity; i++)
+        {
+            index = (h1(key) + i * h2(key)) % capacity;
+
+            if(!table[index].isOccupied && !table[index].isDeleted)
+            {
+                return false;
+            }
+
+            if(table[index].isOccupied && table[index].key == key)
             {
                 table[index].isDeleted = true;
                 table[index].isOccupied = false;
@@ -211,58 +186,18 @@ class HashTableOA {
     }
 
     void print() const {
-        for(size_t i = 0; i < capacity; i++) {
-            if(table[i].isOccupied && !table[i].isDeleted)
+        for (size_t i = 0; i < capacity; i++) {
+            if (table[i].isOccupied && !table[i].isDeleted)
             {
-                cout << "[" << i << "] " << table[i].value << endl;
+                cout << "[" << i << "]" << table[i].value << endl;
             }
         }
-    }
-
-    void loadFromFile(const string& filename) {
-        ifstream in(filename);
-        if(!in.is_open())
-        {
-            cerr << "Error: cannot open file for reading! (" << filename << ")" << endl;
-            return;
-        }
-
-        clean();
-        table = new Cell[capacity];
-        size = 0;
-        loadFactor = 0.0f;
-
-        T value;
-        while(in >> value)
-        {
-            insert(value);
-        }
-
-        in.close();
-    }
-
-    void saveToFile(const string& filename) const {
-        ofstream out(filename);
-        if(!out.is_open())
-        {
-            cerr << "Error: cannot open file for writing! (" << filename << ")" << endl;
-            return;
-        }
-
-        for(size_t i = 0; i < capacity; i++)
-        {
-            if(table[i].isOccupied && !table[i].isDeleted)
-            {
-                out << table[i].value << "\n";
-            }
-        }
-
-        out.close();
     }
 
  private:
     struct Cell {
-        T value;
+        Key key;
+        Value value;
         bool isOccupied;
         bool isDeleted;
 
@@ -284,5 +219,51 @@ class HashTableOA {
 
         a = dist(gen);
         b = dist(gen);
+    }
+
+
+    size_t h1(const Key& key) const {
+        long long keyValue = 0;
+
+        if constexpr (is_integral_v<Key> || is_floating_point_v<Key>)
+        {
+            keyValue = static_cast<long long>(key);
+        }
+        else
+        {
+            unsigned long long hash = 0;
+            for(char c : key)
+            {
+                hash = hash * 131 + static_cast<unsigned char>(c);
+            }
+
+            keyValue = hash;
+        }
+
+        return static_cast<size_t>(( (a * keyValue + b) % p ) % capacity);
+    }
+
+    size_t h2(const Key& key) const {
+        const double A = 0.6180339887;
+        double k_double = 0.0;
+
+        if constexpr (is_integral_v<Key> || is_floating_point_v<Key>)
+        {
+            k_double = static_cast<double>(key);
+        }
+        else
+        {
+            unsigned long long hashValue = 0;
+
+            for(char c : key)
+            {
+                hashValue = hashValue * 131 + static_cast<unsigned char>(c);
+            }
+
+            k_double = static_cast<double>(hashValue);
+        }
+
+        double frac = k_double * A - floor(k_double * A);
+        return static_cast<size_t>(capacity * frac) + 1;
     }
 };

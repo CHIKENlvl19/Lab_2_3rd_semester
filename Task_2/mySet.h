@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Task_2/hashTable.h"
+#include <string>
 
 enum class Command {
     SETADD, SETDEL, SET_AT, SETPRINT, UNKNOWN
@@ -32,7 +33,7 @@ class mySet {
 
  public:
     bool insert(const T& value) {
-        return table.insert(value);
+        return table.insert(value, true);
     }
 
     bool remove(const T& value) {
@@ -42,17 +43,42 @@ class mySet {
     bool contains(const T& value) const {
         return table.isPresent(value);
     }
-    
+
     void print() const {
         table.print();
     }
-    
+
     void loadFromFile(const string& filename = "set.data") {
-        table.loadFromFile(filename);
+    ifstream in(filename);
+    if(!in.is_open())
+    {
+        cerr << "Error: cannot open file for reading! (" << filename << ")" << endl;
+        return;
     }
 
-    void saveToFile(const string& filename = "set.data") {
-        table.saveToFile(filename);
+    T value;
+    while(in >> value)
+    {
+        table.insert(value, true);
+    }
+
+    in.close();
+}
+
+    void saveToFile(const string& filename = "set.data") const {
+        ofstream out(filename);
+        if(!out.is_open())
+        {
+            cerr << "Error: cannot open file for writing! (" << filename << ")" << endl;
+            return;
+        }
+
+        for(auto it = table.begin(); it != table.end(); ++it)
+        {
+            out << *it << "\n";
+        }
+
+        out.close();
     }
 
     size_t size() const {
@@ -60,5 +86,5 @@ class mySet {
     }
 
  private:
-    HashTableOA<T> table;
+    HashTableOA<T, bool> table;
 };

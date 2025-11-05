@@ -7,11 +7,10 @@
 
 using namespace std;
 
-
-template <typename T>
+template <typename Key, typename Value>
 class HashTableOA {
  public:
-    HashTableOA(int capacity = 100000)
+    HashTableOA(int capacity = 10000)
         : size(0), capacity(capacity), loadFactor(0.0f)
     {
         table = new Cell[capacity];
@@ -20,6 +19,9 @@ class HashTableOA {
 
     void clean() {
         delete[] table;
+        table = nullptr;
+        size = 0;
+        loadFactor = 0.0f;
     }
 
     ~HashTableOA() {
@@ -38,12 +40,11 @@ class HashTableOA {
         return static_cast<float>(size) / capacity;
     }
 
-
     // h(k) = ((a*k + b) mod p) mod m
-    size_t h1(const T& key) const {
+    size_t h1(const Key& key) const {
         long long keyValue;
 
-        if constexpr (is_integral_v<T> || is_floating_point_v<T>)
+        if constexpr (is_integral_v<Key> || is_floating_point_v<Key>)
         {
             keyValue = static_cast<long long>(key);
         }
@@ -58,67 +59,54 @@ class HashTableOA {
             keyValue = hash;
         }
 
-        return static_cast<size_t>(( (a * keyValue + b) % p ) % capacity);
+        return static_cast<size_t>(((a * keyValue + b) % p) % capacity);
     }
 
-    size_t h2(const T& key) const {
-        const double A = 0.6180339887;
-        double k_double = 0.0;
-
-        if constexpr (is_integral_v<T> || is_floating_point_v<T>)
-        {
-            k_double = static_cast<double>(key);
-        }
-        else
-        {
-            unsigned long long hashValue = 0;
-
-            for(char c : key)
-            {
-                hashValue = hashValue * 131 + static_cast<unsigned char>(c);
-            }
-
-            k_double = static_cast<double>(hashValue);
-        }
-
-        double frac = k_double * A - floor(k_double * A);
-        return static_cast<size_t>(capacity * frac) + 1;
-    }
-
-    void insert(const T& key) {
+    // линейная пробация: (h1 + i) % m
+    bool insert(const Key& key, const Value& value) {
         size_t index;
 
         for(size_t i = 0; i < capacity; i++)
         {
-            index = (h1(key) + i * h2(key)) % capacity;
+            index = (h1(key) + i) % capacity;
 
-            if( (!table[index].isOccupied || table[index].isDeleted) && table[index].value != key)
+            // вставка в свободную или удалённую ячейку
+            if(!table[index].isOccupied || table[index].isDeleted)
             {
-                table[index].value = key;
+                table[index].key = key;
+                table[index].value = value;
                 table[index].isOccupied = true;
                 table[index].isDeleted = false;
                 size++;
                 loadFactor = getLoadFactor();
-                return;
+                return true;
+            }
+
+            // обновление значения, если ключ уже существует
+            if(table[index].isOccupied && !table[index].isDeleted && table[index].key == key)
+            {
+                table[index].value = value;
+                return true;
             }
         }
 
         cerr << "Error: table is full!" << endl;
+        return false;
     }
 
-    bool isPresent(const T& key) const {
+    bool isPresent(const Key& key) const {
         size_t index;
 
         for(size_t i = 0; i < capacity; i++)
         {
-            index = (h1(key) + i * h2(key)) % capacity;
+            index = (h1(key) + i) % capacity;
 
             if(!table[index].isOccupied && !table[index].isDeleted)
             {
                 return false;
             }
 
-            if(table[index].isOccupied && table[index].value == key)
+            if(table[index].isOccupied && table[index].key == key)
             {
                 return true;
             }
@@ -127,27 +115,50 @@ class HashTableOA {
         return false;
     }
 
-    void remove(const T& key) {
+    Value find(const Key& key) const {
         size_t index;
 
         for(size_t i = 0; i < capacity; i++)
         {
-            index = (h1(key) + i * h2(key)) % capacity;
+            index = (h1(key) + i) % capacity;
 
             if(!table[index].isOccupied && !table[index].isDeleted)
             {
-                return;
+                break;
             }
 
-            if(table[index].isOccupied && table[index].value == key)
+            if(table[index].isOccupied && table[index].key == key)
+            {
+                return table[index].value;
+            }
+        }
+
+        return Value(); // значение по умолчанию
+    }
+
+    bool remove(const Key& key) {
+        size_t index;
+
+        for(size_t i = 0; i < capacity; i++)
+        {
+            index = (h1(key) + i) % capacity;
+
+            if(!table[index].isOccupied && !table[index].isDeleted)
+            {
+                return false;
+            }
+
+            if(table[index].isOccupied && table[index].key == key)
             {
                 table[index].isDeleted = true;
                 table[index].isOccupied = false;
                 size--;
                 loadFactor = getLoadFactor();
-                return;
+                return true;
             }
         }
+
+        return false;
     }
 
     void print() const {
@@ -156,7 +167,7 @@ class HashTableOA {
             cout << "[" << i << "]";
             if(table[i].isOccupied)
             {
-                cout << table[i].value;
+                cout << " {" << table[i].key << ": " << table[i].value << "}";
             }
             else if(table[i].isDeleted)
             {
@@ -168,7 +179,8 @@ class HashTableOA {
 
  private:
     struct Cell {
-        T value;
+        Key key;
+        Value value;
         bool isOccupied;
         bool isDeleted;
 
@@ -191,5 +203,4 @@ class HashTableOA {
         a = dist(gen);
         b = dist(gen);
     }
-
 };
